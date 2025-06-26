@@ -1,20 +1,29 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Sistema Transportadora</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="container mt-4">
-
 <?php
-include('../conexao.php');
-$id = intval($_GET['id']);
-$conn->query("DELETE FROM motoristas WHERE id=$id");
-header('Location: listar.php');
-exit;
-?>
+// Ativa a exibição de erros para depuração (opcional, bom durante o desenvolvimento)
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+// Inclui a conexão
+include('../conexao.php');
+
+// Verifica se o ID foi passado pela URL
+if (isset($_GET['id'])) {
+    // Converte o ID para inteiro para segurança (evita injeção de SQL)
+    $id = intval($_GET['id']);
+
+    // Prepara e executa a query de forma segura com Prepared Statements
+    // Esta é uma melhoria de segurança em relação ao seu código original
+    $stmt = $conn->prepare("DELETE FROM motoristas WHERE id = ?");
+    $stmt->bind_param("i", $id); // "i" significa que a variável é um inteiro
+    $stmt->execute();
+    
+    // Redireciona para a página de listagem
+    header('Location: listar.php');
+    exit; // Termina o script
+
+} else {
+    // Se nenhum ID for fornecido, redireciona ou mostra um erro
+    echo "Erro: ID do motorista não fornecido.";
+    exit;
+}
+?>
