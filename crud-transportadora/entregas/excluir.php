@@ -1,20 +1,35 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Sistema Transportadora</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="container mt-4">
-
 <?php
-include('../conexao.php');
-$id = intval($_GET['id']);
-$conn->query("DELETE FROM entregas WHERE id=$id");
-header('Location: listar.php');
-exit;
-?>
+if (file_exists('../conexao.php')) {
+    include('../conexao.php');
+} else {
+    die("Erro: O arquivo de conexão não foi encontrado.");
+}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+if (isset($_GET['id']) && filter_var($_GET['id'], FILTER_VALIDATE_INT)) {
+    
+    $id = intval($_GET['id']);
+
+    $stmt = $conn->prepare("DELETE FROM entregas WHERE id = ?");
+    
+    if ($stmt === false) {
+        header('Location: listar.php?status=erro_preparar');
+        exit;
+    }
+    
+    $stmt->bind_param("i", $id);
+    
+    if ($stmt->execute()) {
+        header('Location: listar.php?status=excluido');
+    } else {
+        header('Location: listar.php?status=erro_excluir');
+    }
+
+    $stmt->close();
+    $conn->close();
+    exit;
+
+} else {
+    header('Location: listar.php');
+    exit;
+}
+?>
